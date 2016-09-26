@@ -1,0 +1,135 @@
+---
+title: "R_Week_4_Project_1_607_Daniel_Thonn"
+output: html_document
+course: R-607 CUNY MSDA program
+
+---
+
+## Assignment Homework-4_Project_1-607: Exploratory Data Analysis
+
+Summary of Assignment
+This assignment involves data manipulation and analyis to create a summary sheet for chess tournament data.
+
+This Assignment requires the following:
+
+1). R-Studio
+
+The following R-packages are used:
+1.stringr
+
+Steps to reproduce:
+1). run the R-Studio file: R_607_Week_4c_Hmk_Text_Manipulation_Daniel_Thonn.Rmd
+
+
+
+Setting up and Preparing the Environment
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, echo=TRUE}
+
+#install.packages("stringr")
+library(stringr)
+```
+
+
+Load the character names data into an R dataframe
+
+
+```{r, echo=TRUE}
+#Load data from a text file
+data_1 <- readLines("C:/mysqldata/tournamentinfo.txt") 
+head(data_1)
+
+
+#Obtain only columns with pipe symbol in rows (remove horizontal lines)
+data_3 <- data_1[grep(("\\|+"),data_1)]
+
+head(data_3)
+
+# Create a data vector to store manipulated data
+data_4 <- 1
+list(data_4)
+
+#Combine the rows with names plus each row after
+
+for (i in 3:(length(data_3)-1))
+{
+  if (!i %% 2){
+    next
+  }
+  print(data_3[i])
+  data_4[i] <- paste(data_3[i],data_3[i+1])
+}
+
+list(data_4)
+data_4b = unlist(data_4)
+
+# Clean data and take only data with pipe symbols
+data_5b = data_4b[grep(("\\|+"),data_4b)]
+data_5b
+
+#Retain only columns that have a pipe (|)
+data_5 <- data_4[grep(("\\|+"),data_4)]
+head(data_5)
+
+#Remove trailing extra spaces \\s+
+data_6 <- gsub("\\s+"," ",data_5) 
+head(data_6)
+
+data_6b <- unlist(data_6)
+
+#Build columns of required data and check each column
+
+playername <- str_trim(unlist(str_extract_all(data_6b, "([[:alpha:]., ]-?){7,}")))
+list(playername)
+
+
+playerstate <- str_trim(unlist(str_extract_all(data_5b, "\\  [[:upper:]]{2}")))
+list(playerstate)
+
+
+playerpoints<-str_trim(unlist(str_extract_all(data_6b, "[0-9]\\.[0-9]-?")))
+list(playerpoints)
+
+playerprerating <- as.numeric(gsub("\\: ","",unlist(str_extract_all(data_5b, "\\: [[:digit:] ]{4}"))))
+playerprerating 
+
+oppprerating1=unlist(str_extract_all(data_5b, "\\|[[:upper:]]  [[:digit:] ]{1,}"))
+head(oppprerating1)
+
+oppprerating2 <- as.numeric(unlist(str_extract_all(oppprerating1,"[[:digit:]]{1,2}")))
+head(oppprerating2)
+
+# obtain the opponent pre-rating by indexing the player pre-rating by the opponents played
+oppprerating3 <- playerprerating[oppprerating2]
+head(oppprerating3)
+list(oppprerating3)
+
+
+# Create a matrix of opp-preratings to obtain average
+oppprerating4 <- matrix(oppprerating3,7,64)
+
+#Take transpose of matrix to obtain 64x7 format that fits the data output needed
+oppprerating5 <- t(oppprerating4)
+head(oppprerating5)
+
+#Take the mean of the opponent ratings by player
+avg_oppprerating <- as.integer(rowMeans(oppprerating5))
+head(avg_oppprerating)
+
+#Create a data frame with the fields required
+chess_summary <- data.frame(playername,playerstate,playerpoints,playerprerating,avg_oppprerating)
+list(chess_summary)
+
+#Write the chess summary output to a csv file
+write.csv(chess_summary, "C:/mysqldata/chess_summary.csv")
+
+
+```
+
+
+
+#END
